@@ -29,7 +29,7 @@ const useStateList = () => {
     // }
 
     const newItem = () => setTextItem()
-    console.log("Esto es textItem desde useStateList", textItem)
+    // console.log("Esto es textItem desde useStateList", textItem)
     const updateList = () => setList()
 
     const addItem = () => {

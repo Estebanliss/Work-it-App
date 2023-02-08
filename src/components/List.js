@@ -1,32 +1,24 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { StyleSheet, View, FlatList } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const List = ({ lista }) => {
 
+ 
+
   // const getData = async () => {
   //   try {
-  //     const value = await AsyncStorage.getItem('@storage_Key')
-  //     if (value !== null) {
-  //       console.log("Se está guardando y viendo correctamente el valor: ", value)
-  //     }
+  //     const list = await AsyncStorage.getItem('LIST-TASK')
+  //     return list != null ? JSON.parse(list) : null
   //   } catch (e) {
-  //     // error reading value
+  //     console.log(e)
   //   }
   // }
 
-  const getData = async () => {
-    try {
-      const list = await AsyncStorage.getItem('LIST-TASK')
-      // return list != null ? JSON.parse(list) : null;
-      console.log("Esto es el console.log de Get", list)
-    } catch(e) {
-      console.log(e)
-    }
-  }
+  // getData()
+  // console.log("Esto es el console.log de Get", lista)
 
-  getData()
 
   const renderItem = ({ item }) => (
     <View style={styles.renderItemStyle}>

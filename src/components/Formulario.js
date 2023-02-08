@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View, TextInput, Pressable, Button, TouchableOpacity } from 'react-native'
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -8,42 +8,40 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const schema = yup.object({
     tarea: yup.string().required("Defina una tarea a realizar"),
-    prioridad: yup.number().required("Se requiere dar un nivel de prioridad a la tarea").max(10, "La prioridad debe ser del 1 al 10"), 
+    prioridad: yup.number().required("Se requiere dar un nivel de prioridad a la tarea").max(10, "La prioridad debe ser del 1 al 10"),
 })
 
 export default function Formulario() {
+    const [listaTarea, setListaTarea] = React.useState([])
     const { reset, control, handleSubmit, formState: { errors } } = useForm({
-        defaultValues:{
-            tarea: "",
-            prioridad: "",
-        },
         resolver: yupResolver(schema)
     });
 
-    const [list, setList] = useState([])
-
-    function handleSignIn(data) {
-        storeData(data),
-        reset(),
-        console.log("Esto es data SetItem", data)
-    }
-
-    
     const storeData = async (data) => {
         try {
-
-            const task = JSON.stringify(data)
-            await AsyncStorage.setItem('LIST-TASK', task)
-        } catch (e) {
-            console.log(e)
+            const value = await AsyncStorage.getItem('DATO_GLOBAL2');
+            setListaTarea(value)
+            setListaTarea(prev => [...prev, data])
+            const datoString = JSON.stringify(listaTarea)
+            await AsyncStorage.setItem(
+                'DATO_GLOBAL2',
+                datoString
+            );
+            reset()
+            
+        } catch (error) {
+            console.log(error)
         }
+
     }
 
-
-    
-
-    
-
+    useEffect(() => {
+        const valueGet = async () => {
+            const value = await AsyncStorage.getItem('DATO_GLOBAL');
+            console.log("DATO_GLOBAL dentro del useEffects", value)
+        }
+        valueGet()
+    }, [listaTarea])
 
     return (
         <>
@@ -80,11 +78,20 @@ export default function Formulario() {
 
                 {errors.prioridad && <Text style={styles.labelError}>{errors.prioridad?.message}</Text>}
 
-                <TouchableOpacity style={styles.containerButton} onPress={handleSubmit(handleSignIn)}>
+                <TouchableOpacity style={styles.containerButton} onPress={handleSubmit(storeData)}>
                     <Text style={styles.button}>Guardar</Text>
                 </TouchableOpacity>
-
-                
+            </View>
+            <View style={{ marginTop: 20 }}>
+                <Button
+                    title="Eliminar"
+                    onPress={() => {
+                        AsyncStorage.removeItem("DATO_GLOBAL2");
+                    }}
+                />
+            </View>
+            <View>
+                <Text>{value2}</Text>
             </View>
         </>
     )
@@ -96,6 +103,7 @@ const styles = StyleSheet.create({
         flex: 2,
         width: "100%",
         alignItems: 'center',
+        marginBottom: 100,
     },
 
     input: {
