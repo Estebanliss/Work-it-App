@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react'
-import { StyleSheet, View, FlatList } from 'react-native'
+import { StyleSheet, View, FlatList, KeyboardAvoidingView } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
-const List = ({ lista }) => {
+const ListScreen = ({ lista }) => {
 
- 
+
 
   // const getData = async () => {
   //   try {
@@ -38,17 +38,17 @@ const List = ({ lista }) => {
   return (
     <View style={styles.titleApp3}>
       <View style={styles.containerFlatList}>
-        <FlatList
-          data={lista}
-          renderItem={renderItem}
-          keyExtractor={item => item.id}
-        />
+          <FlatList
+            data={lista}
+            renderItem={renderItem}
+            keyExtractor={item => item.id}
+          />
       </View>
     </View>
   )
 }
 
-export default List
+export default ListScreen
 
 const styles = StyleSheet.create({
   //LISTA

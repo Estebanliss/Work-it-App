@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, TextInput, Pressable, Button, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, View, TextInput, Pressable, Button, TouchableOpacity, Alert, Modal } from 'react-native'
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
@@ -12,88 +12,136 @@ const schema = yup.object({
 })
 
 export default function Formulario() {
+    const [modalVisible, setModalVisible] = useState(false);
+
+
     const [listaTarea, setListaTarea] = React.useState([])
     const { reset, control, handleSubmit, formState: { errors } } = useForm({
         resolver: yupResolver(schema)
     });
 
+    const removeItem = async () => {
+        try {
+            setListaTarea("")
+            const remove = await AsyncStorage.removeItem('DATO_GLOBAL');
+            console.log("Datos eliminados de lista de tarea", listaTarea)
+            console.log("Datos eliminados de storage", remove)
+        } catch (error) {
+            console.log("Este es el error de storeData", error)
+        }
+    }
+    // const getData = async () => {
+    //     const value = await AsyncStorage.getItem('DATO_GLOBAL');
+    //     if (value !== null) {
+    //         const valorGet = JSON.parse(value);
+    //         console.log("valorGet", valorGet)
+    //     }
+    // }
+
+    // const [testValue, setTestValue] = useState(null);
+    // AsyncStorage.getItem("DATO_GLOBAL").then((value) => { setTestValue(value) });
+    // console.log("testValue", testValue)
+
+
+
     const storeData = async (data) => {
         try {
-            const value = await AsyncStorage.getItem('DATO_GLOBAL2');
-            setListaTarea(value)
-            setListaTarea(prev => [...prev, data])
-            const datoString = JSON.stringify(listaTarea)
+            const value = await AsyncStorage.getItem('DATO_GLOBAL');
+            console.log("Dato getValue", value)
+
+            if (value !== null || value !== string) {
+                const valueParse = JSON.parse(value)
+                setListaTarea(valueParse)
+            } else {
+                setListaTarea("")
+            }
+            setListaTarea(prev => [...prev, JSON.stringify(data)])
+
             await AsyncStorage.setItem(
-                'DATO_GLOBAL2',
-                datoString
+                'DATO_GLOBAL',
+                "Este dato se lee"
             );
+            const value2 = await AsyncStorage.getItem('DATO_GLOBAL');
+            console.log("Dato getValue2", value2)
+            console.log("Dato dentro de listaTarea", listaTarea)
+
             reset()
-            
         } catch (error) {
-            console.log(error)
+            console.log("Este es el error de storeData", error)
         }
 
     }
 
-    useEffect(() => {
-        const valueGet = async () => {
-            const value = await AsyncStorage.getItem('DATO_GLOBAL');
-            console.log("DATO_GLOBAL dentro del useEffects", value)
-        }
-        valueGet()
-    }, [listaTarea])
+    console.log("Esto seria lo que lee el FlatList", listaTarea)
+
+    // useEffect(() => {
+    //     const valueGet = async () => {
+    //         const value = await AsyncStorage.getItem('DATO_GLOBAL');
+    //         console.log("DATO_GLOBAL dentro del useEffects", value)
+    //         // setListaTarea(value)
+    //     }
+    //     valueGet()
+    // }, [listaTarea])
+
+
+
 
     return (
-        <>
-            <View style={styles.container}>
-                <Controller
-                    control={control}
-                    name="tarea"
-                    render={({ field: { onChange, onBlur, value } }) => (
-                        <TextInput
-                            onChangeText={onChange}
-                            onBlur={onBlur}
-                            value={value}
-                            placeholder='Escribe una tarea'
-                            style={styles.input}
-                        />
-                    )}
-                />
-                {errors.tarea && <Text style={styles.labelError}>{errors.tarea?.message}</Text>}
+        <View style={styles.centeredView}>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    Alert.alert('Modal has been closed.');
+                    setModalVisible(!modalVisible);
+                }}>
+                <View style={styles.container}>
+                    <Controller
+                        control={control}
+                        name="tarea"
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <TextInput
+                                onChangeText={onChange}
+                                onBlur={onBlur}
+                                value={value}
+                                placeholder='Escribe una tarea'
+                                style={styles.input}
+                            />
+                        )}
+                    />
+                    {errors.tarea && <Text style={styles.labelError}>{errors.tarea?.message}</Text>}
 
-                <Controller
-                    control={control}
-                    name="prioridad"
-                    render={({ field: { onChange, onBlur, value } }) => (
-                        <TextInput
-                            onChangeText={onChange}
-                            onBlur={onBlur}
-                            value={value}
-                            placeholder='Define la prioridad'
-                            keyboardType='number-pad'
-                            style={styles.input}
-                        />
-                    )}
-                />
+                    <Controller
+                        control={control}
+                        name="prioridad"
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <TextInput
+                                onChangeText={onChange}
+                                onBlur={onBlur}
+                                value={value}
+                                placeholder='Define la prioridad'
+                                keyboardType='number-pad'
+                                style={styles.input}
+                            />
+                        )}
+                    />
 
-                {errors.prioridad && <Text style={styles.labelError}>{errors.prioridad?.message}</Text>}
+                    {errors.prioridad && <Text style={styles.labelError}>{errors.prioridad?.message}</Text>}
 
-                <TouchableOpacity style={styles.containerButton} onPress={handleSubmit(storeData)}>
-                    <Text style={styles.button}>Guardar</Text>
-                </TouchableOpacity>
-            </View>
-            <View style={{ marginTop: 20 }}>
-                <Button
-                    title="Eliminar"
-                    onPress={() => {
-                        AsyncStorage.removeItem("DATO_GLOBAL2");
-                    }}
-                />
-            </View>
-            <View>
-                <Text>{value2}</Text>
-            </View>
-        </>
+                    <TouchableOpacity style={styles.containerButton} onPress={handleSubmit(storeData)}>
+                        <Text style={styles.button}>Guardar</Text>
+                    </TouchableOpacity>
+                </View>
+                <View>
+                    <Button
+                        title="Eliminar datos"
+                        onPress={removeItem}
+                    />
+                </View>
+            </Modal>
+
+        </View>
     )
 }
 
@@ -103,7 +151,7 @@ const styles = StyleSheet.create({
         flex: 2,
         width: "100%",
         alignItems: 'center',
-        marginBottom: 100,
+        marginBottom: 150,
     },
 
     input: {
@@ -155,6 +203,49 @@ const styles = StyleSheet.create({
         textAlign: "center",
         marginBottom: 20,
 
+    },
+
+    // MODAL
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 22,
+    },
+    modalView: {
+        margin: 20,
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 35,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    button: {
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2,
+    },
+    buttonOpen: {
+        backgroundColor: '#F194FF',
+    },
+    buttonClose: {
+        backgroundColor: '#2196F3',
+    },
+    textStyle: {
+        color: 'white',
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+    modalText: {
+        marginBottom: 15,
+        textAlign: 'center',
     },
 
 })
